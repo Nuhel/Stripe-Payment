@@ -39,7 +39,7 @@ public class PaymentSessionConfigCreator {
 
 
     @NonNull
-    public static PaymentSession.PaymentSessionListener getPaymentSessionListener(final PaymentSessionCallback paymentSessionCallback) {
+    public static PaymentSession.PaymentSessionListener getPaymentSessionListener(final PaymentSessionCallback paymentSessionCallback, final int amount) {
         return new PaymentSession.PaymentSessionListener() {
 
             PaymentMethod paymentMethod;
@@ -73,6 +73,7 @@ public class PaymentSessionConfigCreator {
 
                         AndroidNetworking.get("https://devsite.airportshuttles.com/stripe/makePayment.php")
                                 .addQueryParameter("id", paymentMethod.id)
+                                .addQueryParameter("amount", amount+"")
                                 .setPriority(Priority.HIGH)
                                 .build()
                                 .getAsJSONObject(new JSONObjectRequestListener() {

@@ -1,20 +1,20 @@
 package com.nuhel.stripetry;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 
 import com.androidnetworking.AndroidNetworking;
+import com.nuhel.stripetry.Stripe.StripePaymentActivity;
 import com.nuhel.stripetry.Stripe.StripePayment;
 import com.stripe.android.PaymentSession;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.view.AddPaymentMethodActivityStarter;
 import com.stripe.android.view.PaymentMethodsActivityStarter;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends StripePaymentActivity {
 
     private PaymentSession paymentSession;
     private PaymentMethod paymentMethod;
@@ -68,8 +68,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.setAmount(500);
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PaymentMethodsActivityStarter.REQUEST_CODE) {
+        /*if (requestCode == PaymentMethodsActivityStarter.REQUEST_CODE) {
             st = new StripePayment(this);
             st.initPaymentSession(10,"",requestCode,resultCode,data);
         } else if (requestCode == AddPaymentMethodActivityStarter.REQUEST_CODE) {
@@ -79,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
                 st.executePaymentResult(requestCode, data);
                 st = null;
             }
-        }
+        }*/
     }
 
 

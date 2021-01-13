@@ -86,7 +86,7 @@ public class StripePayment implements PaymentSessionCallback {
                 PaymentSessionConfigCreator.getPaymentSessionConfig()
         );
 
-        paymentSession.init(PaymentSessionConfigCreator.getPaymentSessionListener(this));
+        paymentSession.init(PaymentSessionConfigCreator.getPaymentSessionListener(this,amount));
         paymentSession.handlePaymentData(requestCode, resultCode, data);
     }
 
