@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         try {
-            StripePayment.initStripe(getApplicationContext(),"Q1FE2Tx6MOOCoQjonty8aKjuad02");
+            StripePayment.init(getApplicationContext(),"Q1FE2Tx6MOOCoQjonty8aKjuad02");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             st.initPaymentSession(10,"",requestCode,resultCode,data);
         } else if (requestCode == AddPaymentMethodActivityStarter.REQUEST_CODE) {
              AddPaymentMethodActivityStarter.Result result = AddPaymentMethodActivityStarter.Result.fromIntent(data);
-        } else {
+        } else if(StripePayment.PAYMENT_CONFIRM_REQUEST_CODE == requestCode ) {
             if(st != null){
                 st.executePaymentResult(requestCode, data);
                 st = null;

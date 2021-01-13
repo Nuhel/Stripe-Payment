@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import com.nuhel.stripetry.MainActivity;
 import com.stripe.android.ApiResultCallback;
 import com.stripe.android.PaymentIntentResult;
+import com.stripe.android.PaymentSession;
 import com.stripe.android.model.PaymentIntent;
 
 import java.lang.ref.WeakReference;
@@ -36,6 +37,7 @@ public class PaymentResultCallback
         if (activity == null) {
             return;
         }
+
 
         PaymentIntent paymentIntent = result.getIntent();
 

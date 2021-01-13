@@ -26,16 +26,15 @@ import java.util.concurrent.Callable;
 
 public class StripePayment implements PaymentSessionCallback {
 
+    public static final int PAYMENT_CONFIRM_REQUEST_CODE = 50000;
+
     //@params Static Params for basic initialization
     private static Context appContext;
     private static String customerId;
     private static boolean isInitialized = false;
     private static String publishableKey = "pk_test_51HYDPKKKrgZqoLaaBx4sFoLpni1rxR7rNKjzbom6Ur08muGttmXNvMFYmi4uvCcL4lPNkYJPuNtqQ3uKE2dIoVP500W1PI1sse";
 
-
-
-
-    public static void initStripe(Context context,String customerId) throws Exception {
+    public static void init(Context context, String customerId) throws Exception {
         if(isInitialized != false){
             Log.d("Stripe", "Already Initialized");
         }else{
@@ -69,10 +68,9 @@ public class StripePayment implements PaymentSessionCallback {
 
 
     //@params NonStatic Params to make payment
-    @NonNull private AppCompatActivity activity;
+    private AppCompatActivity activity;
     private PaymentSession paymentSession;
     private Stripe stripe;
-    private Callable<Void> callExecutePaymentResult;
 
 
     public StripePayment(AppCompatActivity activity){
@@ -89,7 +87,6 @@ public class StripePayment implements PaymentSessionCallback {
         );
 
         paymentSession.init(PaymentSessionConfigCreator.getPaymentSessionListener(this));
-        PaymentMethodsActivityStarter.Result result = PaymentMethodsActivityStarter.Result.fromIntent(data);
         paymentSession.handlePaymentData(requestCode, resultCode, data);
     }
 
