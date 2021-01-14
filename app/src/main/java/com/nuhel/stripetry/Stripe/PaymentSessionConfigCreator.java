@@ -4,10 +4,8 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.androidnetworking.AndroidNetworking;
-import com.androidnetworking.common.Priority;
-import com.androidnetworking.error.ANError;
-import com.androidnetworking.interfaces.JSONObjectRequestListener;
+import com.nuhel.stripetry.Stripe.Retrofit.StripeEndpoints;
+import com.nuhel.stripetry.Stripe.Retrofit.StripeRetrofitFactory;
 import com.nuhel.stripetry.Stripe.callbacks.PaymentSessionCallback;
 import com.stripe.android.PaymentSession;
 import com.stripe.android.PaymentSessionConfig;
@@ -19,6 +17,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
+
+import io.reactivex.Single;
+import io.reactivex.SingleObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.Call;
 
 public class PaymentSessionConfigCreator {
     @NonNull
@@ -35,7 +40,7 @@ public class PaymentSessionConfigCreator {
 
 
     @NonNull
-    public static PaymentSession.PaymentSessionListener getPaymentSessionListener(final PaymentSessionCallback paymentSessionCallback, final int amount) {
+    public static PaymentSession.PaymentSessionListener getPaymentSessionListener(final PaymentSessionCallback paymentSessionCallback, final String baseUrl,final String secretKeyUrl,final int amount) {
         return new PaymentSession.PaymentSessionListener() {
 
             PaymentMethod paymentMethod;
@@ -65,9 +70,31 @@ public class PaymentSessionConfigCreator {
                     paymentMethod = data.getPaymentMethod();
                     // Use the data to complete your charge - see below.
                     if (paymentMethod != null) {
-                        Log.e("log-ready", "true");
 
-                        AndroidNetworking.get("https://devsite.airportshuttles.com/stripe/makePayment.php")
+                        StripeEndpoints stripeEndpoints = StripeRetrofitFactory.getClientSecretEndPoint(baseUrl);;
+                        CompositeDisposable compositeDisposable = new CompositeDisposable();
+
+                        compositeDisposable.add(stripeEndpoints.getClientSecret(secretKeyUrl,paymentMethod.id, String.valueOf(amount))
+                                .subscribeOn(Schedulers.io())
+                                .onErrorResumeNext(new Single<ClientSecretModel>() {
+                                    @Override
+                                    protected void subscribeActual(@io.reactivex.annotations.NonNull SingleObserver<? super ClientSecretModel> observer) {
+                                        Log.e("KeyProvider", "Error : " + observer);
+                                    }
+                                })
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(
+                                        response -> {
+                                            try {
+                                                paymentSessionCallback.onSecretKeyGenerated(paymentMethod.id, response.getClientSecret());
+                                                //Log.e("response", "response : " + response.getClientSecret());
+                                                //keyUpdateListener.onKeyUpdate(response);
+                                            } catch (Exception e) {
+
+                                            }
+                                        }));
+
+                        /*AndroidNetworking.get("https://devsite.airportshuttles.com/stripe/makePayment.php")
                                 .addQueryParameter("id", paymentMethod.id)
                                 .addQueryParameter("amount", amount+"")
                                 .setPriority(Priority.HIGH)
@@ -77,8 +104,6 @@ public class PaymentSessionConfigCreator {
                                     @Override
                                     public void onResponse(JSONObject response) {
                                         try {
-                                            //Log.e("log-secret", response.getString("clientSecret"));
-
                                             paymentSessionCallback.onSecretKeyGenerated(paymentMethod.id, response.getString("clientSecret"));
                                         } catch (JSONException e) {
                                             e.printStackTrace();
@@ -89,7 +114,7 @@ public class PaymentSessionConfigCreator {
                                     public void onError(ANError anError) {
 
                                     }
-                                });
+                                });*/
                         //
                     } else {
                         Log.e("log-payment_method", "Null");

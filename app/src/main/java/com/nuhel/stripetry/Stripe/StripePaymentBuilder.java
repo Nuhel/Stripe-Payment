@@ -1,6 +1,8 @@
 package com.nuhel.stripetry.Stripe;
+
 import android.app.Application;
 import android.content.Context;
+
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentConfiguration;
 
@@ -9,7 +11,8 @@ public class StripePaymentBuilder<T extends StripePaymentBuilder> {
     private Context appContext;
     private String customerId;
     private String baseUrl;
-    private  String publishableKey ;
+    private String publishableKey;
+    private String clientSecretKeyUrlForPayment;
     private String ephemeralKeyProviderUrl;
 
 
@@ -19,6 +22,7 @@ public class StripePaymentBuilder<T extends StripePaymentBuilder> {
         this.publishableKey = stripePaymentInstanceBuilder.publishableKey;
         this.baseUrl = stripePaymentInstanceBuilder.baseUrl;
         this.ephemeralKeyProviderUrl = stripePaymentInstanceBuilder.ephemeralKeyProviderUrl;
+        this.clientSecretKeyUrlForPayment = stripePaymentInstanceBuilder.clientSecretKeyUrlForPayment;
 
     }
 
@@ -32,14 +36,22 @@ public class StripePaymentBuilder<T extends StripePaymentBuilder> {
 
     }
 
-    public String getPublishableKey(){
+    public String getPublishableKey() {
         return this.publishableKey;
+    }
+
+    public String getBaseUrl() {
+        return this.baseUrl;
+    }
+
+    public String getClientSecretKeyUrlForPayment() {
+        return this.clientSecretKeyUrlForPayment;
     }
 
     private void initCustomerSession() {
         CustomerSession.initCustomerSession(
                 appContext,
-                new EphemeralKeyBuilder(customerId,baseUrl,ephemeralKeyProviderUrl)
+                new EphemeralKeyBuilder(customerId, baseUrl, ephemeralKeyProviderUrl)
         );
     }
 
@@ -47,6 +59,7 @@ public class StripePaymentBuilder<T extends StripePaymentBuilder> {
     public static class StripePaymentInstanceBuilder<T extends StripePaymentInstanceBuilder> {
 
         private Context appContext;
+
         public T setAppContext(Context appContext) throws Exception {
             if (appContext != null && appContext instanceof Application) {
                 this.appContext = appContext;
@@ -67,6 +80,11 @@ public class StripePaymentBuilder<T extends StripePaymentBuilder> {
             return (T) this;
         }
 
+        public T setClientSecretKeyUrlForPayment(String clientSecretKeyUrlForPayment) {
+            this.clientSecretKeyUrlForPayment = clientSecretKeyUrlForPayment;
+            return (T) this;
+        }
+
         public T setCustomerId(String customerId) {
             this.customerId = customerId;
             return (T) this;
@@ -80,9 +98,11 @@ public class StripePaymentBuilder<T extends StripePaymentBuilder> {
         public StripePaymentBuilder build() {
             return new StripePaymentBuilder(this);
         }
+
         private String customerId;
         private String publishableKey;
         private String baseUrl;
+        private String clientSecretKeyUrlForPayment;
         private String ephemeralKeyProviderUrl;
     }
 }

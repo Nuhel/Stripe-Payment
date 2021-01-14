@@ -23,11 +23,15 @@ public class StripePayment implements PaymentSessionCallback {
     private PaymentSession paymentSession;
     private Stripe stripe;
     private PaymentResultCallback paymentResultCallback;
+    private String baseUrl;
+    private String secretKeyUrl;
 
 
-    public StripePayment(AppCompatActivity activity, PaymentResultCallback paymentResultCallback, String publishableKey) {
+    public StripePayment(AppCompatActivity activity, PaymentResultCallback paymentResultCallback, String publishableKey,String baseUrl,String secretKeyUrl) {
         this.activity = activity;
         this.paymentResultCallback = paymentResultCallback;
+        this.baseUrl = baseUrl;
+        this.secretKeyUrl = secretKeyUrl;
         this.stripe = new Stripe(activity, Objects.requireNonNull(publishableKey));
     }
 
@@ -37,7 +41,7 @@ public class StripePayment implements PaymentSessionCallback {
                 PaymentSessionConfigCreator.getPaymentSessionConfig()
         );
 
-        paymentSession.init(PaymentSessionConfigCreator.getPaymentSessionListener(this, amount));
+        paymentSession.init(PaymentSessionConfigCreator.getPaymentSessionListener(this, baseUrl,secretKeyUrl,amount));
         paymentSession.handlePaymentData(requestCode, resultCode, data);
     }
 
