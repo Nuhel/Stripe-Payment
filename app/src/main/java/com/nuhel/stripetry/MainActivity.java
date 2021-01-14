@@ -4,11 +4,13 @@ import androidx.annotation.Nullable;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 
 import com.androidnetworking.AndroidNetworking;
 import com.nuhel.stripetry.Stripe.StripePaymentActivity;
 import com.nuhel.stripetry.Stripe.StripePayment;
+import com.nuhel.stripetry.Stripe.StripePaymentBuilder;
 import com.stripe.android.PaymentSession;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.view.AddPaymentMethodActivityStarter;
@@ -20,6 +22,7 @@ public class MainActivity extends StripePaymentActivity {
     private PaymentMethod paymentMethod;
     private Button payButton, addCard;
     private StripePayment st;
+    private StripePaymentBuilder stripePaymentBuilder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +38,17 @@ public class MainActivity extends StripePaymentActivity {
 
 
         try {
-            StripePayment.init(getApplicationContext(),"Q1FE2Tx6MOOCoQjonty8aKjuad02");
+            stripePaymentBuilder = StripePayment.builder()
+                    .setAppContext(getApplicationContext())
+                    .setBaseUrl("https://devsite.airportshuttles.com/stripe/")
+                    .setEphemeralKeyProviderUrl("createEphemeralKey.php")
+                    .setCustomerId("Q1FE2Tx6MOOCoQjonty8aKjuad02")
+                    .setPublishableKey("pk_test_51HYDPKKKrgZqoLaaBx4sFoLpni1rxR7rNKjzbom6Ur08muGttmXNvMFYmi4uvCcL4lPNkYJPuNtqQ3uKE2dIoVP500W1PI1sse")
+            .build()
+            .get();
+            super.setStripePaymentBuilder(stripePaymentBuilder);
         } catch (Exception e) {
+            Log.e("null",e.toString());
             e.printStackTrace();
         }
 
@@ -68,19 +80,8 @@ public class MainActivity extends StripePaymentActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.setAmount(500);
+        super.setAmount(900);
         super.onActivityResult(requestCode, resultCode, data);
-        /*if (requestCode == PaymentMethodsActivityStarter.REQUEST_CODE) {
-            st = new StripePayment(this);
-            st.initPaymentSession(10,"",requestCode,resultCode,data);
-        } else if (requestCode == AddPaymentMethodActivityStarter.REQUEST_CODE) {
-             AddPaymentMethodActivityStarter.Result result = AddPaymentMethodActivityStarter.Result.fromIntent(data);
-        } else if(StripePayment.PAYMENT_CONFIRM_REQUEST_CODE == requestCode ) {
-            if(st != null){
-                st.executePaymentResult(requestCode, data);
-                st = null;
-            }
-        }*/
     }
 
 

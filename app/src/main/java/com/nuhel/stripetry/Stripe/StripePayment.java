@@ -1,114 +1,72 @@
 package com.nuhel.stripetry.Stripe;
 
-import android.app.Application;
-import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.nuhel.stripetry.Stripe.callbacks.PaymentResultCallback;
+import com.nuhel.stripetry.Stripe.callbacks.PaymentResultCallbackListener;
 import com.nuhel.stripetry.Stripe.callbacks.PaymentSessionCallback;
-import com.stripe.android.CustomerSession;
-import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.PaymentSession;
 import com.stripe.android.Stripe;
 import com.stripe.android.model.ConfirmPaymentIntentParams;
-import com.stripe.android.view.PaymentMethodsActivityStarter;
-
 import org.jetbrains.annotations.NotNull;
-
 import java.util.Objects;
-import java.util.concurrent.Callable;
 
 
 public class StripePayment implements PaymentSessionCallback {
 
     public static final int PAYMENT_CONFIRM_REQUEST_CODE = 50000;
 
-    //@params Static Params for basic initialization
-    private static Context appContext;
-    private static String customerId;
-    private static boolean isInitialized = false;
-    private static String publishableKey = "pk_test_51HYDPKKKrgZqoLaaBx4sFoLpni1rxR7rNKjzbom6Ur08muGttmXNvMFYmi4uvCcL4lPNkYJPuNtqQ3uKE2dIoVP500W1PI1sse";
-
-    public static void init(Context context, String customerId) throws Exception {
-        if(isInitialized != false){
-            Log.d("Stripe", "Already Initialized");
-        }else{
-            StripePayment.appContext  = context;
-            StripePayment.customerId  = customerId;
-            if(context != null && context instanceof Application){
-                PaymentConfiguration.init(
-                        context,
-                        StripePayment.publishableKey
-                );
-                initCustomerSession(StripePayment.customerId);
-                isInitialized = true;
-            }else{
-                throw new Exception("Context is missing");
-            }
-        }
-    }
-
-    private static void initCustomerSession(String customerId){
-        CustomerSession.initCustomerSession(StripePayment.appContext, new EphemeralKeyBuilder(customerId));
-    }
-
-
-    private static Context getContext(){
-        return  StripePayment.appContext;
-    }
-
-    public static boolean isIsInitialized(){
-        return StripePayment.isInitialized;
-    }
-
-
     //@params NonStatic Params to make payment
     private AppCompatActivity activity;
     private PaymentSession paymentSession;
     private Stripe stripe;
+    private PaymentResultCallback paymentResultCallback;
 
 
-    public StripePayment(AppCompatActivity activity){
+    public StripePayment(AppCompatActivity activity, PaymentResultCallback paymentResultCallback, String publishableKey) {
         this.activity = activity;
-        this.stripe =  new Stripe(activity, Objects.requireNonNull(StripePayment.publishableKey));
-
-
+        this.paymentResultCallback = paymentResultCallback;
+        this.stripe = new Stripe(activity, Objects.requireNonNull(publishableKey));
     }
 
-    public void initPaymentSession(int amount, String desc, int requestCode, int resultCode, @Nullable Intent data){
+    public void initPaymentSession(int amount, String desc, int requestCode, int resultCode, @Nullable Intent data) {
         paymentSession = new PaymentSession(
                 activity,
                 PaymentSessionConfigCreator.getPaymentSessionConfig()
         );
 
-        paymentSession.init(PaymentSessionConfigCreator.getPaymentSessionListener(this,amount));
+        paymentSession.init(PaymentSessionConfigCreator.getPaymentSessionListener(this, amount));
         paymentSession.handlePaymentData(requestCode, resultCode, data);
     }
 
-    public void executePaymentResult(int requestCode, Intent data){
-        stripe.onPaymentResult(requestCode, data, new PaymentResultCallback(activity));
+    public void executePaymentResult(int requestCode, Intent data) {
+        stripe.onPaymentResult(requestCode, data, new PaymentResultCallbackListener(paymentResultCallback));
     }
 
     @Override
     public void onCommunicationChanged(boolean isCommunicating) {
-
+        if(isCommunicating){
+            paymentResultCallback.onPaymentFlowStarted();
+        }else{
+            paymentResultCallback.onPaymentFlowStopped();
+        }
     }
 
     @Override
     public void onSecretKeyGenerated(String paymentMethodId, String clientSecret) {
-        ConfirmPaymentIntentParams confirmPaymentIntentParams =  ConfirmPaymentIntentParams.createWithPaymentMethodId(paymentMethodId, clientSecret, "");
-        stripe.confirmPayment(activity,confirmPaymentIntentParams);
+        ConfirmPaymentIntentParams confirmPaymentIntentParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(paymentMethodId, clientSecret, "");
+        stripe.confirmPayment(activity, confirmPaymentIntentParams);
     }
 
     @Override
-    public void onError(int errorCode, @NotNull String errorMessage) {
-
+    public void onPaymentSessionError(int errorCode, @NotNull String errorMessage) {
+        paymentResultCallback.onPaymentSessionError(errorMessage);
     }
 
+    public static StripePaymentBuilder.StripePaymentInstanceBuilder builder() {
+        return new StripePaymentBuilder.StripePaymentInstanceBuilder();
+    }
 
 }

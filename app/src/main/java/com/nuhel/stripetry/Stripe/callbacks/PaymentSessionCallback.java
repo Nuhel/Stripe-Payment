@@ -6,5 +6,5 @@ public interface PaymentSessionCallback {
 
     void onCommunicationChanged(boolean isCommunicating);
     void onSecretKeyGenerated(String paymentMethodId,String clientSecret);
-    void onError(int errorCode, @NotNull String errorMessage);
+    void onPaymentSessionError(int errorCode, @NotNull String errorMessage);
 }

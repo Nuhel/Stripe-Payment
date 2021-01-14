@@ -1,6 +1,5 @@
 package com.nuhel.stripetry.Stripe;
 
-import android.app.Activity;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -9,13 +8,10 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.JSONObjectRequestListener;
-import com.nuhel.stripetry.MainActivity;
 import com.nuhel.stripetry.Stripe.callbacks.PaymentSessionCallback;
 import com.stripe.android.PaymentSession;
 import com.stripe.android.PaymentSessionConfig;
 import com.stripe.android.PaymentSessionData;
-import com.stripe.android.Stripe;
-import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.PaymentMethod;
 
 import org.jetbrains.annotations.NotNull;
@@ -51,16 +47,16 @@ public class PaymentSessionConfigCreator {
 
             @Override
             public void onError(int errorCode, @NotNull String errorMessage) {
-                paymentSessionCallback.onError(errorCode,errorMessage);
+                paymentSessionCallback.onPaymentSessionError(errorCode,errorMessage);
             }
 
 
             @Override
             public void onPaymentSessionDataChanged(@NonNull PaymentSessionData data) {
-                Log.e("data", data.toString());
+                //Log.e("data", data.toString());
                 if (data.getUseGooglePay()) {
                     // customer intends to pay with Google Pay
-                    Log.e("using", "play");
+                    //Log.e("using", "play");
                 }
 
                 // Update your UI here with other data
